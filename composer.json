@@ -1,0 +1,50 @@
+{
+    "name": "laravel/laravel",
+    "description": "The Laravel Framework.",
+    "keywords": ["framework", "laravel"],
+    "license": "MIT",
+    "type": "project",
+    "require": {
+        "php": ">=5.5.9",
+        "laravel/framework": "5.1.*"
+    },
+    "require-dev": {
+        "fzaninotto/faker": "~1.4",
+        "mockery/mockery": "0.9.*",
+        "phpunit/phpunit": "~4.0",
+        "phpspec/phpspec": "~2.1",
+        "heroku/heroku-buildpack-php": "*"
+    },
+    "autoload": {
+        "classmap": [
+            "laravel/database"
+        ],
+        "psr-4": {
+            "App\\": "laravel/app/"
+        }
+    },
+    "autoload-dev": {
+        "classmap": [
+            "laravel/tests/TestCase.php"
+        ]
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "php laravel/artisan clear-compiled"
+        ],
+        "pre-update-cmd": [
+            "php laravel/artisan clear-compiled"
+        ],
+        "post-root-package-install": [
+            "php -r \"copy('laravel/.env.example', 'laravel/.env');\""
+        ],
+        "post-create-project-cmd": [
+            "php laravel/artisan key:generate"
+        ]
+    },
+    "config": {
+        "vendor-dir": "vendor",
+        "bin-dir": "vendor/bin",
+        "preferred-install": "dist"
+    }
+}
