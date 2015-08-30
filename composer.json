@@ -30,14 +30,10 @@
     },
     "scripts": {
         "post-install-cmd": [
-            "php laravel/artisan clear-compiled",
-            "php laravel/artisan optimize"
+            "php laravel/artisan clear-compiled"
         ],
         "pre-update-cmd": [
             "php laravel/artisan clear-compiled"
-        ],
-        "post-update-cmd": [
-            "php laravel/artisan optimize"
         ],
         "post-root-package-install": [
             "php -r \"copy('laravel/.env.example', 'laravel/.env');\""
