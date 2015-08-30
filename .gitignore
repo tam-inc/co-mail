@@ -2,6 +2,6 @@
 /node_modules
 Homestead.yaml
 .env
-htdocs/
-.DS_Store
 .idea/
+/htdocs
+.DS_Store
