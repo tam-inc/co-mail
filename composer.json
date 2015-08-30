@@ -46,7 +46,6 @@
         ]
     },
     "config": {
-        "vendor-dir": "laravel/vendor",
         "preferred-install": "dist"
     }
 }
