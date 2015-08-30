@@ -29,20 +29,20 @@
     },
     "scripts": {
         "post-install-cmd": [
-            "php laravel/artisan clear-compiled",
-            "php laravel/artisan optimize"
+            "cd laravel; php artisan clear-compiled",
+            "cd laravel; php artisan optimize"
         ],
         "pre-update-cmd": [
-            "php laravel/artisan clear-compiled"
+            "cd laravel; php artisan clear-compiled"
         ],
         "post-update-cmd": [
-            "php laravel/artisan optimize"
+            "cd laravel; php artisan optimize"
         ],
         "post-root-package-install": [
-            "php -r \"copy('laravel/.env.example', 'laravel/.env');\""
+            "cd laravel; php -r \"copy('.env.example', '.env');\""
         ],
         "post-create-project-cmd": [
-            "php laravel/artisan key:generate"
+            "cd laravel; php artisan key:generate"
         ]
     },
     "config": {
