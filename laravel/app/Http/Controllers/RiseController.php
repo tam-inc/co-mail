@@ -8,22 +8,20 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 
-use Illuminate\Http\Request;
-
 class RiseController extends Controller
 {
 
     public function __construct(){
-//        Session::put('users',"hoge");
+//        Session::forget('auth');
+
         //ログイン機構
         //セッションがあるかどうかを判定する
-        if (Session::has('users'))
+        if (Session::has('auth'))
         {
 
             return "セッション有り";
 
         } else {
-            $request->session()->get('key');
 
             $this->beforeFilter(function(){
 
@@ -37,7 +35,9 @@ class RiseController extends Controller
 
     protected function auth()
     {
-        return "hoge";
+
+        $data = Session::all();
+        var_dump($data);
     }
 
 
