@@ -11,6 +11,18 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'RiseController@auth');
+
+//Route::get('/auth','CallbackController@googleCallback');
+Route::get('/auth','CallbackController@googleCallback');
+
+//Route::get('/auth', function () {
+//
+//
+//    return redirect('/');
+//
+//});
+
+//ログイン
+//アプリの状態を返すもの
+//を分ける
