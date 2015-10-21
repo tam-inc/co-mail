@@ -11,17 +11,17 @@
 |
 */
 
-Route::get('/', 'RiseController@auth');
+Route::get('/', 'RiceController@get_user');
 
-//Route::get('/auth','CallbackController@googleCallback');
-Route::get('/auth','CallbackController@googleCallback');
+Route::get('/auth','AuthController@auth');
+Route::get('/auth/callback','AuthController@googleCallback');
+
+Route::post('/apply', 'RiceController@apply');
 
 Route::get('/session', function () {
-
     Session::forget('auth');
-
 });
 
-//ログイン
-//アプリの状態を返すもの
-//を分ける
+Route::get('/form', function () {
+    return view('form');
+});

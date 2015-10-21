@@ -38,7 +38,7 @@ return [
     'google' => [
         'client_id' => '723949359202-pu00nhe1ph3jgpmb42hf47gank0cmpnd.apps.googleusercontent.com',
         'client_secret' => '5tCZxM9MtqN0v9qXlhxRxlVV',
-        'redirect' => 'https://781630f0.ngrok.com/auth',
+        'redirect' => 'https://781630f0.ngrok.com/auth/callback',
     ],
 
 ];

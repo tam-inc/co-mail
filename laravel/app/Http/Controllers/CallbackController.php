@@ -15,50 +15,82 @@ class CallbackController extends Controller
     public function googleCallback()
     {
 
-        try {
+        $google_info = Socialite::with('google')->user();
+        $google_id = (int)$google_info->getId();
 
-            $user = Socialite::with('google')->user();
-            $id = $user->getId();
+        //todo model作成
+        //DBからメールアドレスが一致したユーザー情報を取得
+        $user = DB::table('users')->where('google_id',$google_id)->first();
 
-            //todo model作成
-            //DBからメールアドレスが一致したユーザー情報を取得
-            $user_exist = DB::table('users')->where('google_id',$id)->first();
+        //既に一致するユーザーがいない場合
+        if(!$user) {
 
-            if(!$user_exist) {
+            DB::table('users')->insert([
+                'google_id' => $google_id,
+                'name' => $google_info->getName(),
+                'email' => $google_info->getEmail(),
+                'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
+                'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
+            ]);
 
-                DB::table('users')->insert([
-                    'google_id' => $user->getId(),
-                    'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
-                    'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
-                ]);
+            $user = DB::table('users')->where('google_id',$google_id)->first();
 
-                DB::table('rise')->insert([
-                    'name' => $user->getName(),
-                    'email' => $user->getEmail(),
-                    'volume' => 0,
-                    'apply_date' => \Carbon\Carbon::now()->toDateTimeString(),
-                    'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
-                    'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
-                ]);
+            Session::put('auth', $user->id);
 
-                Session::put('auth', $id);
+            return redirect('/');
 
-                return redirect('/');
-
-            } else {
-
-                Session::put('auth', $id);
-
-                return redirect('/');
-
-            }
-
-        } catch (\Exception $e) {
-//            var_dump($e);
-//            throw $e;
-            //todo エラー処理 HTTPステータスコード
-            return "失敗";
         }
+        //既に一致するユーザーがいる場合
+        else {
+
+            Session::put('auth', $user->id);
+
+            return redirect('/');
+
+        }
+//        try {
+//
+//            $google_info = Socialite::with('google')->user();
+//            $google_id = $google_info->getId();
+//
+//            //todo model作成
+//            //DBからメールアドレスが一致したユーザー情報を取得
+//            $user = DB::table('users')->where('google_id',$google_id)->first();
+//
+//            //既に一致するユーザーがいない場合
+//            if(!$user_exist) {
+//
+//                DB::table('users')->insert([
+//                    'google_id' => $google_id,
+//                    'name' => $google_info->getName(),
+//                    'email' => $google_info->getEmail(),
+//                    'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
+//                    'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
+//                ]);
+//
+//                $user = DB::table('users')->where('google_id',$google_id)->first();
+//
+//                Session::put('auth', $user->id);
+//
+//                return redirect('/');
+//
+//            }
+//            //既に一致するユーザーがいる場合
+//            else {
+//
+//                Session::put('auth', $user->id);
+//
+//                return redirect('/');
+//
+//            }
+//
+//        } catch (\Exception $e) {
+////            var_dump($e);
+////            throw $e;
+//            //todo エラー処理 HTTPステータスコード
+////            http_response_code (401);
+//            return "失敗";
+//        }
 
     }
 
