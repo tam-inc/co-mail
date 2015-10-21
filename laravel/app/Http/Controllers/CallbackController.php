@@ -7,6 +7,7 @@ use Session;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Support\Facades\DB;
 
 class CallbackController extends Controller
 {
@@ -15,19 +16,42 @@ class CallbackController extends Controller
     {
 
         try {
-            $user = Socialite::with('google')->user();
 
+            $user = Socialite::with('google')->user();
             $id = $user->getId();
 
-            //todo DBにgoogle認証の情報を入れる
-//            $user->getNickname();
-//            $user->getName();
-//            $user->getEmail();
-//            $user->getAvatar();
+            //todo model作成
+            //DBからメールアドレスが一致したユーザー情報を取得
+            $user_exist = DB::table('users')->where('google_id',$id)->first();
 
-            Session::put('auth',$id);
+            if(!$user_exist) {
 
-            return redirect('/');
+                DB::table('users')->insert([
+                    'google_id' => $user->getId(),
+                    'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
+                    'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
+                ]);
+
+                DB::table('rise')->insert([
+                    'name' => $user->getName(),
+                    'email' => $user->getEmail(),
+                    'volume' => 0,
+                    'apply_date' => \Carbon\Carbon::now()->toDateTimeString(),
+                    'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
+                    'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
+                ]);
+
+                Session::put('auth', $id);
+
+                return redirect('/');
+
+            } else {
+
+                Session::put('auth', $id);
+
+                return redirect('/');
+
+            }
 
         } catch (\Exception $e) {
 //            var_dump($e);
