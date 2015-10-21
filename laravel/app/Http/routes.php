@@ -16,12 +16,11 @@ Route::get('/', 'RiseController@auth');
 //Route::get('/auth','CallbackController@googleCallback');
 Route::get('/auth','CallbackController@googleCallback');
 
-//Route::get('/auth', function () {
-//
-//
-//    return redirect('/');
-//
-//});
+Route::get('/session', function () {
+
+    Session::forget('auth');
+
+});
 
 //ログイン
 //アプリの状態を返すもの
