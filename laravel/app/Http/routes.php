@@ -11,7 +11,7 @@
 |
 */
 
-Route::get('/', 'RiceController@get_user');
+Route::get('/', 'RiceController@getUser');
 
 Route::get('/auth','AuthController@auth');
 Route::get('/auth/callback','AuthController@googleCallback');
