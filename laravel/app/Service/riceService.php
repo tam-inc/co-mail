@@ -29,5 +29,37 @@ class RiceService{
         return;
 
     }
+
+    public function today(){
+
+        $today = array();
+        $today['now'] = \Carbon\Carbon::now();
+        $today['date'] = $today['now']->format('Y-m-d');
+
+        //本日の申込者を取ってくる
+        $subscriber = DB::table('rice')
+            ->leftJoin('users', 'rice.user_id', '=', 'users.id')
+            ->where('date',$today['date'])
+            ->select('user_id', 'name', 'volume')
+            ->get();
+
+        //受付中&結果発表前かどうか
+        if($today['now']->hour > 11){
+            $is_open = false;
+            $limit = true;
+        } else if($today['now']->hour > 8){
+            $is_open = true;
+            $limit = false;
+        }
+
+        return json_encode([
+            "status" => "OK",
+            "is_open" => $is_open,
+            "limit" => $limit,
+            "subscriber" => $subscriber,
+        ]);
+
+    }
+
 }
 

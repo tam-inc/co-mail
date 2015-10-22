@@ -18,6 +18,8 @@ Route::get('/auth/callback','AuthController@googleCallback');
 
 Route::post('/apply', 'RiceController@apply');
 
+Route::get('/today', 'RiceController@today');
+
 Route::get('/session', function () {
     Session::forget('auth');
 });

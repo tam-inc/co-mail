@@ -41,5 +41,14 @@ class RiceController extends Controller
 
     }
 
+    protected function today(RiceService $riceService)
+    {
+
+        $result = $riceService->today();
+
+        return $result;
+
+    }
+
 }
 
