@@ -7,9 +7,6 @@ use App\Service\UserService;
 use Socialite;
 use Session;
 use Request;
-use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Foundation\Validation\ValidatesRequests;
 use DB;
 
 class RiceController extends Controller
