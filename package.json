@@ -17,9 +17,6 @@
   },
   "author": "TAM, Inc.",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/tam-inc/co-mail/issues"
-  },
   "homepage": "https://github.com/tam-inc/co-mail#readme",
   "dependencies": {
     "backbone": "^1.2.3",
@@ -30,13 +27,16 @@
     "gulp-pleeease": "^2.0.1",
     "gulp-plumber": "^1.0.1",
     "gulp-sass": "^2.0.4",
+    "handlebars-loader": "^1.1.4",
     "html-loader": "^0.3.0",
     "jquery": "^2.1.4",
     "jshint": "^2.8.0",
-    "laravel-elixir": "^3.4.2",
     "mocha": "^2.3.3",
     "underscore": "^1.8.3",
     "webpack": "^1.12.2",
     "webpack-stream": "^2.1.1"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.9.11"
   }
 }
