@@ -5,3 +5,4 @@ Homestead.yaml
 .idea/
 /htdocs
 .DS_Store
+/public/js/bundle.js
