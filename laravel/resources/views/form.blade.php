@@ -36,9 +36,9 @@
         </style>
     </head>
     <body>
-    <form action="http://781630f0.ngrok.com/apply" method="post">
-        <p>id:<input type="text" name="id"></p>
-        <p>rice:<input type="text" name="rice"></p>
+    <form action="http://<?php echo env('DOMAIN'); ?>/auth" method="get">
+        {{--<p>id:<input type="text" name="id"></p>--}}
+        {{--<p>rice:<input type="text" name="rice"></p>--}}
         <input type="submit">
     </form>
     </body>
