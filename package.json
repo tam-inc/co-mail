@@ -1,0 +1,42 @@
+{
+  "private": true,
+  "name": "co-mail",
+  "version": "0.1.0",
+  "description": "Let's have rice in your office. It helps you to choose a turn of cooking rice.",
+  "main": "index.js",
+  "engines": {
+    "node": "4.2.1",
+    "npm": "3.3.x"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tam-inc/co-mail.git"
+  },
+  "author": "TAM, Inc.",
+  "license": "MIT",
+  "homepage": "https://github.com/tam-inc/co-mail#readme",
+  "dependencies": {
+    "backbone": "^1.2.3",
+    "bootstrap-sass": "^3.3.5",
+    "gulp": "^3.9.0",
+    "gulp-jshint": "^1.11.2",
+    "gulp-mocha": "^2.1.3",
+    "gulp-pleeease": "^2.0.1",
+    "gulp-plumber": "^1.0.1",
+    "gulp-sass": "^2.0.4",
+    "handlebars-loader": "^1.1.4",
+    "html-loader": "^0.3.0",
+    "jquery": "^2.1.4",
+    "jshint": "^2.8.0",
+    "mocha": "^2.3.3",
+    "underscore": "^1.8.3",
+    "webpack": "^1.12.2",
+    "webpack-stream": "^2.1.1"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.9.11"
+  }
+}
