@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Service\RiceService;
 use App\Service\UserService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Socialite;
 use Session;
 use Request;
@@ -26,15 +28,26 @@ class RiceController extends Controller
     protected function apply(RiceService $riceService)
     {
 
-        $params = array();
-        $params['id'] = Request::input('id');
-        $params['rice'] = Request::input('rice');
+        $params = [
+//            'id' => Session::get('auth'),
+            'id' => Request::input('id'),
+            'rice' => Request::input('rice'),
+        ];
 
-        $riceService->createApplyTable($params);
+        if($params['id'] && $params['rice']){
 
-        return json_encode([
-            "status" => "OK",
-        ]);
+            $result = $riceService->apply($params);
+
+            return $result;
+
+        } else {
+
+            return JsonResponse::create([
+                "status" => "BAD",
+                "message" => "入力値が正しくありません。",
+            ],400);
+
+        }
 
     }
 

@@ -2,6 +2,7 @@
 namespace App\Service;
 
 use DB;
+use Illuminate\Http\JsonResponse;
 
 /**
  * Created by PhpStorm.
@@ -13,22 +14,76 @@ use DB;
 class RiceService
 {
 
-    //申し込み者をDBに入れる
-    public function createApplyTable($params)
+    //申し込む
+    public function apply($params)
     {
 
-        $input_time = \Carbon\Carbon::now()->toDateTimeString();
+        $today = [
+            'now' => \Carbon\Carbon::now(),
+            'y-m-d' =>  \Carbon\Carbon::now()->format('Y-m-d'),
+        ];
 
-        DB::table('rice')->insert([
-            'user_id' => $params['id'],
-            'date' => \Carbon\Carbon::now(),
-            'volume' => $params['rice'],
-            'winner' => 0,
-            'created_at' => $input_time,
-            'updated_at' => $input_time
-        ]);
+        //限界値以上申し込まれているかチェック
+        $limit_volume = 10;
+        $today_volume = (int)$this->getTotalVolume();
+        $today_residual_quantity = $limit_volume - $today_volume;
+
+        //updateする量が限界値以上かチェック
+        //todo 既に申し込みの場合は残量が変わるのでロジック見直し
+        if($today_residual_quantity >= $params['rice']){
+
+            $is_limit = false;
+
+        } else {
+
+            $is_limit = true;
+
+        }
+
+        if($is_limit){
+
+            return JsonResponse::create([
+                "status" => "BAD",
+                "residual_quantity" => $today_residual_quantity,
+                "message" => "本日の申し込める量を超えています。",
+            ],400);
+
+        }
+
+        //既に申し込み済みかチェック
+        $applied = DB::table('rice')
+            ->where('date', $today['now'])
+            ->where('user_id',$params['id'])
+            ->get();
+
+        if($applied){
+
+            DB::table('rice')
+                ->where('date', $today['now'])
+                ->where('user_id',$params['id'])
+                ->update([
+                    'volume' => $params['rice'],
+                ]);
+
+        } else {
+
+            DB::table('rice')->insert([
+                'user_id' => $params['id'],
+                'date' => $today['now'],
+                'volume' => $params['rice'],
+                'winner' => 0,
+                'created_at' => $today['now']->toDateTimeString(),
+                'updated_at' => $today['now']->toDateTimeString(),
+            ]);
+
+        }
+
+        return JsonResponse::create([
+            "status" => "OK",
+        ],200);
 
     }
+
 
     //現在の受付状況等をJSONで返す
     public function today()
@@ -90,7 +145,6 @@ SQL;
         ];
         $pickup = DB::select($sql,$bind);
 
-
         //row->countをkeyにして配列を作成する
         $result = [];
         foreach($pickup as $row ){
@@ -128,7 +182,7 @@ SQL;
 
     }
 
-    //本日の分量を取ってくる フロントで計算？
+    //本日の分量を取ってくる
     protected function getTotalVolume(){
 
         $today = [
