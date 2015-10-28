@@ -29,20 +29,16 @@ class UserService{
 
     }
 
-
-    public function getUser($id)
+    public function getUser($google_id)
     {
-        $user = DB::table('users')->where('id', $id)->first();
 
-        return json_encode([
-            "session" => $id,
-            "status" => "OK",
-            "user" => [
-                "id" => $user->id,
-                "name" => $user->name,
-                "email" => $user->email,
-            ]
-        ]);
+        $user = DB::table('users')
+            ->where('google_id', $google_id)
+            ->select('id', 'name', 'email')
+            ->first();
+
+        return $user;
     }
+
 }
 
