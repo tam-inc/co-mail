@@ -8,7 +8,7 @@ var gulp           = require( 'gulp' ),
 	browserSync    = require( 'browser-sync' );
 
 gulp.task( 'webpack', function () {
-	return gulp.src( [ 'scripts/main.js' ] )
+	return gulp.src( [ 'scripts/app.js' ] )
 		.pipe( plumber() )
 		.pipe( webpack( webpack_config ) )
 		.pipe( gulp.dest( './' ) );
