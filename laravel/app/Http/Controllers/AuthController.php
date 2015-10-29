@@ -52,7 +52,7 @@ class AuthController extends Controller
 
         $google_info = Socialite::with( 'google' )->user();
 
-        $google_id = ( int )$google_info->getId();
+        $google_id = $google_info->getId();
 
         $user = $userService -> getUserByGoogleID( $google_id );
 
