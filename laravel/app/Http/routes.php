@@ -31,15 +31,10 @@ Route::get('/rice/auth/callback','AuthController@googleCallback');
 Route::get('/', function () {
     $session = Session::get('auth');
     var_dump($session);
-//    return view('form');
 });
 
 Route::get('/win', 'RiceController@getTodayWinner');
 
 Route::get('/session', function () {
     Session::forget('auth');
-});
-
-Route::get('/form', function () {
-    return view('form');
 });
