@@ -112,6 +112,30 @@ class RiceService
 
     }
 
+    public function getTodayWinner(){
+
+        $today = [
+            'now' => \Carbon\Carbon::now(),
+            'y-m-d' =>  \Carbon\Carbon::now()->format('Y-m-d'),
+        ];
+
+        $result = DB::table('rice')
+            ->where('date', $today['now'])
+            ->where('winner','>','0')
+            ->get();
+
+        if(empty($result)){
+
+             return false;
+
+        } else {
+
+            return true;
+
+        }
+
+    }
+
     //米を炊く人を選出
     protected function getWinner(){
 
@@ -120,6 +144,8 @@ class RiceService
             'y-m-d' =>  \Carbon\Carbon::now()->format('Y-m-d'),
             'one_week_ago' => \Carbon\Carbon::now()->subDay(7)->format('Y-m-d'),
         ];
+
+        //todo winnerがいたら選出を行わない処理をする
 
         $sql = <<<SQL
 SELECT
