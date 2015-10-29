@@ -13,23 +13,29 @@ use DB;
 class RiceService
 {
 
-    //申し込む
-    public function apply($params)
+    //限界値を超えているかどうか確認
+    public function limitCheck( $params )
     {
 
-        $today = [
-            'now' => \Carbon\Carbon::now(),
-            'y-m-d' =>  \Carbon\Carbon::now()->format('Y-m-d'),
-        ];
+        $limit_volume      = (float)10;
 
-        //限界値以上申し込まれているかチェック
-        $limit_volume = 10;
-        $today_volume = (int)$this->getTotalVolume();
-        $today_residual_quantity = $limit_volume - $today_volume;
+        $today_volume      = (float)$this->getTotalVolume();
 
-        //updateする量が限界値以上かチェック
-        //todo 既に申し込みの場合は残量が変わるのでロジック見直し
-        if($today_residual_quantity >= $params['rice']){
+        $applied = $this->appliedCheck( $params );
+
+        //申込可能値設定 新規か変更かどうかで値を分ける
+        if( $applied ){
+
+            $residual_quantity = $limit_volume - ( $today_volume - $applied->volume ) ;
+
+        } else {
+
+            $residual_quantity = $limit_volume - $today_volume;
+
+        }
+
+        //updateする量が申込可能値以上かチェック
+        if( $residual_quantity >= $params[ 'rice' ] ){
 
             $is_limit = false;
 
@@ -39,47 +45,74 @@ class RiceService
 
         }
 
-        if($is_limit){
+        return $is_limit;
 
-            return JsonResponse::create([
-                "status" => "BAD",
-                "residual_quantity" => $today_residual_quantity,
-                "message" => "本日の申し込める量を超えています。",
-            ],400);
+    }
 
-        }
 
-        //既に申し込み済みかチェック
-        $applied = DB::table('rice')
-            ->where('date', $today['now'])
-            ->where('user_id',$params['id'])
-            ->get();
+    //申し込む
+    public function apply($params)
+    {
 
-        if($applied){
+        $applied = $this->appliedCheck( $params );
 
-            DB::table('rice')
-                ->where('date', $today['now'])
-                ->where('user_id',$params['id'])
-                ->update([
-                    'volume' => $params['rice'],
-                ]);
+        if( $applied ){
+
+            $this->updateApplyData( $params );
 
         } else {
 
-            DB::table('rice')->insert([
-                'user_id' => $params['id'],
-                'date' => $today['now'],
-                'volume' => $params['rice'],
-                'winner' => 0,
-                'created_at' => $today['now']->toDateTimeString(),
-                'updated_at' => $today['now']->toDateTimeString(),
-            ]);
+            $this->insertApplyData( $params );
 
         }
 
-        return JsonResponse::create([
-            "status" => "OK",
-        ],200);
+    }
+
+
+    //申込済みかチェック
+    protected function appliedCheck( $params ){
+
+        $now = \Carbon\Carbon::now();
+
+        //申込済みかどうかチェック
+        $applied_data = DB::table( 'rice' )
+            ->where( 'date' , $now )
+            ->where( 'user_id' , $params[ 'id' ] )
+            ->first();
+
+        return $applied_data;
+
+    }
+
+
+    //新規申込
+    protected function insertApplyData( $params ){
+
+        $now = \Carbon\Carbon::now();
+
+        DB::table( 'rice' )->insert([
+
+            'winner'     => 0,
+            'date'       => $now,
+            'user_id'    => $params[ 'id' ],
+            'volume'     => $params[ 'rice' ],
+            'created_at' => $now->toDateTimeString(),
+            'updated_at' => $now->toDateTimeString(),
+
+        ]);
+
+    }
+
+
+    //申込内容変更
+    protected function updateApplyData( $params ){
+
+        $now = \Carbon\Carbon::now();
+
+        DB::table( 'rice' )
+            ->where( 'date' , $now )
+            ->where( 'user_id' ,$params[ 'id' ] )
+            ->update(['volume' => $params[ 'rice' ]] );
 
     }
 

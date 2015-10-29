@@ -12,44 +12,53 @@ use DB;
 class RiceController extends Controller
 {
 
-    protected function getUser(UserService $userService)
-    {
+    use RestControllerTrait;
 
-        $id = Session::get('auth');
-
-        $user = $userService->getUser($id);
-
-        return $user;
-
-    }
-
-    protected function apply(RiceService $riceService)
+    // /rice/apply
+    protected function recept( RiceService $riceService )
     {
 
         $params = [
-//            'id' => Session::get('auth'),
-            'id' => Request::input('id'),
-            'rice' => Request::input('rice'),
+//            'id' => Session::get( 'auth' ),
+            'id'   => Request::input( 'id' ),
+            'rice' => Request::input( 'rice' ),
         ];
 
-        if($params['id'] && $params['rice']){
+        if( $params[ 'id' ] && $params[ 'rice' ] ){
 
-            $result = $riceService->apply($params);
+            //限界値チェック
+            $is_limit = $this->limitCheck( $params , $riceService );
 
-            return $result;
+            if($is_limit){
+
+                return $this->responseBad([
+
+                    "message" => "本日申し込める量を超えています。"
+
+                ]);
+
+            }
+
+            //申し込む
+            $riceService->apply( $params );
+
+            return $this->responseOk([]);
 
         } else {
 
-            return JsonResponse::create([
-                "status" => "BAD",
+            return $this->responseBad([
+
                 "message" => "入力値が正しくありません。",
-            ],400);
+
+            ]);
 
         }
 
     }
 
-    protected function today(RiceService $riceService)
+
+    // /rice/today
+    protected function today( RiceService $riceService )
     {
 
         $result = $riceService->today();
@@ -58,7 +67,17 @@ class RiceController extends Controller
 
     }
 
-    protected function getTodayWinner(RiceService $riceService)
+
+    protected function limitCheck( $params , $riceService ){
+
+        $is_limit = $riceService->limitCheck( $params );
+
+        return $is_limit;
+
+    }
+
+
+    protected function getTodayWinner( RiceService $riceService )
     {
 
         $result = $riceService->getTodayWinner();
