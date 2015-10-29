@@ -60,5 +60,14 @@ class RiceController extends Controller
 
     }
 
+    protected function getTodayWinner(RiceService $riceService)
+    {
+
+        $result = $riceService->getTodayWinner();
+
+        return [$result];
+
+    }
+
 }
 
