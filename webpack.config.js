@@ -6,7 +6,7 @@ var webpack = require( 'webpack' );
 
 module.exports = {
 	entry: {
-		'main': './scripts/main.js'
+		'main': './scripts/app.js'
 	},
 	output: {
 		'filename': 'public/js/bundle.js'
