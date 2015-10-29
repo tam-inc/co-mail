@@ -12,7 +12,7 @@ class AuthController extends Controller
     use RestControllerTrait;
 
     //ログインチェック
-    public function login( UserService $userService ){
+    public function getUser( UserService $userService ){
 
         $session = Session::get( 'auth' );
 
