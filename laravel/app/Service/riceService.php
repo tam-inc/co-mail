@@ -85,6 +85,18 @@ class RiceService
     }
 
 
+    //申込内容を削除
+    protected function deleteApplyData( $params ){
+
+        $now = \Carbon\Carbon::now();
+
+        DB::table( 'rice' )
+            ->where( 'date' , $now )
+            ->where( 'user_id' , $params[ 'id' ] )
+            ->delete();
+
+    }
+
     //新規申込
     protected function insertApplyData( $params ){
 
