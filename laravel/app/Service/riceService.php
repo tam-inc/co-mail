@@ -13,26 +13,15 @@ use DB;
 class RiceService
 {
 
-    //限界値を超えているかどうか確認
     public function limitCheck( $params )
     {
 
+        //todo 限界値が決め打ちになっているのでどこかに変数で持つ
         $limit_volume      = (float)10;
 
-        $today_volume      = (float)$this->getTotalVolume();
+        $today_volume      = (float)$this->getTotalVolumeNotSelf( $params );
 
-        $applied = $this->appliedCheck( $params );
-
-        //申込可能値設定 新規か変更かどうかで値を分ける
-        if( $applied ){
-
-            $residual_quantity = $limit_volume - ( $today_volume - $applied->volume ) ;
-
-        } else {
-
-            $residual_quantity = $limit_volume - $today_volume;
-
-        }
+        $residual_quantity = $limit_volume - $today_volume;
 
         //updateする量が申込可能値以上かチェック
         if( $residual_quantity >= $params[ 'rice' ] ){
@@ -54,17 +43,21 @@ class RiceService
     public function apply($params)
     {
 
-        $applied = $this->appliedCheck( $params );
+        try {
 
-        if( $applied ){
+            DB::beginTransaction();
 
-            $this->updateApplyData( $params );
+                $this->deleteApplyData( $params );
 
-        } else {
+                $this->insertApplyData( $params );
 
-            $this->insertApplyData( $params );
+            DB::commit();
 
-        }
+        } catch (\Exception $e){
+
+            DB::rollback();
+
+        };
 
     }
 
@@ -111,7 +104,7 @@ class RiceService
             'created_at' => $now->toDateTimeString(),
             'updated_at' => $now->toDateTimeString(),
 
-        ]);
+            ]);
 
     }
 
@@ -182,7 +175,7 @@ class RiceService
 
 
     //米を炊く人を選出
-    protected function getWinner(){
+    protected function selectWinner(){
 
         $now = \Carbon\Carbon::now();
 
@@ -206,10 +199,12 @@ LEFT JOIN (
 ) as count_table ON count_table.user_id = rice.user_id
 WHERE date=:today
 SQL;
+
         $bind = [
             "today" => $now->format( 'Y-m-d' ),
             "one_week_ago" => $now->subDay(7)->format( 'Y-m-d' ),
         ];
+
         $pickup = DB::select($sql,$bind);
 
         //row->countをkeyにして配列を作成する
@@ -248,11 +243,11 @@ SQL;
     }
 
 
-    //本日の分量を取得
+    //本日の総申込量を取得
     protected function getTotalVolume(){
 
         $now = \Carbon\Carbon::now();
-
+        
         $result = DB::table( 'rice' )
             ->where( 'date' , $now->format( 'Y-m-d' ) )
             ->where( 'volume' , '>' , 0 )
@@ -262,33 +257,19 @@ SQL;
 
     }
 
+    //本日の自分以外の総申込量を取得
+    public function getTotalVolumeNotSelf( $params ){
 
-//    protected function transactionSample()
-//    {
-//        /** @var DatabaseManager $man */
-//        $man = "hoge";
-//        $db = $man->connection();
-//
-//        $db->beginTransaction();
-//        // トランザクションスタート
-//
-//        $db->commit(); // コミット
-//        $db->rollBack(); // ロールバック
-//
-//        try{
-//            $db->transaction(fucntion(){
-//                // 中の処理を自動でコミット
-//
-//                // rollback したい時は Exception投げるだけでOK
-//            });// 自動コミット
-//        }catch (\Exception $e){
-//            // ロールバックはしなくていい
-//            $this->responseBad();
-//        }
-//
-//        DB::transaction();
-//
-//
-//    }
+        $now = \Carbon\Carbon::now();
+
+        $result = DB::table( 'rice' )
+            ->where( 'date' , $now->format( 'Y-m-d' ) )
+            ->where( 'volume' , '>' , 0 )
+            ->whereNotIn('user_id', [ $params[ 'id' ] ])
+            ->sum( 'volume' );
+
+        return $result;
+
+    }
 
 }
