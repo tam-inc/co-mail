@@ -12,10 +12,10 @@
 */
 
 //ログインしているかチェック
-Route::get('/rice/me','AuthController@login');
+Route::get('/rice/me','AuthController@getUser');
 
 //申し込みを受け付ける
-Route::post('/rice/apply', 'RiceController@apply');
+Route::post('/rice/apply', 'RiceController@recept');
 
 //コメールの状態を返す
 Route::get('/rice/today', 'RiceController@today');
