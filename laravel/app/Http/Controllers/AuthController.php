@@ -5,31 +5,34 @@ namespace App\Http\Controllers;
 use App\Service\UserService;
 use Socialite;
 use Session;
-use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
 
-    //ログインしているかチェック
-    public function login(UserService $userService){
+    use RestControllerTrait;
 
-        $session = Session::get('auth');
+    //ログインチェック
+    public function login( UserService $userService ){
 
-        if($session){
+        $session = Session::get( 'auth' );
 
-            $user = $userService->getUser($session);
+        if( $session ){
 
-            return JsonResponse::create([
-                "status" => "OK",
+            $user = $userService -> getUser( $session );
+
+            return $this->responseOk([
+
                 "user" => $user,
-            ],200);
+
+            ]);
 
         } else {
 
-            return JsonResponse::create([
-                "status" => "BAD",
+            return $this->responseBad([
+
                 "message" => "ログインしていません。",
-            ],403);
+
+            ]);
 
         }
 
@@ -39,32 +42,32 @@ class AuthController extends Controller
     public function auth()
     {
 
-        return Socialite::with('google')->redirect();
+        return Socialite::with( 'google' )->redirect();
 
     }
 
     //google認証リダイレクトページ
-    //user情報を格納 / session格納
-    public function googleCallback(UserService $userService)
+    public function googleCallback( UserService $userService )
     {
-        $google_info = Socialite::with('google')->user();
-        $google_id = (int)$google_info->getId();
 
-        //DBからgoogle_idが一致したユーザー情報を取得
-        $user = $userService->getUser($google_id);
+        $google_info = Socialite::with( 'google' )->user();
 
-        //既に一致するユーザーがいない場合
-        if(!$user) {
+        $google_id = ( int )$google_info->getId();
 
-            $user = $userService->createUser($google_info);
+        $user = $userService -> getUserByGoogleID( $google_id );
+
+        if( !$user ) {
+
+            $userService -> createUser( $google_info , $google_id );
+
+            $user = $userService -> getUserByGoogleID( $google_id );
 
         }
 
-        //todo ユーザーIDをトークン化する
-        Session::put('auth', $google_id);
-        return redirect('/');
+        Session::put( 'auth' , $user->id );
+
+        return redirect( '/' );
 
     }
 
 }
-
