@@ -17,9 +17,9 @@ class RiceService
     {
 
         //todo 限界値が決め打ちになっているのでどこかに変数で持つ
-        $limit_volume      = (float)10;
+        $limit_volume      = ( float )10;
 
-        $today_volume      = (float)$this->getTotalVolumeNotSelf( $params );
+        $today_volume      = ( float )$this->getTotalVolumeNotSelf( $params );
 
         $residual_quantity = $limit_volume - $today_volume;
 
@@ -40,7 +40,7 @@ class RiceService
 
 
     //申し込む
-    public function apply($params)
+    public function apply( $params )
     {
 
         try {
@@ -53,7 +53,7 @@ class RiceService
 
             DB::commit();
 
-        } catch (\Exception $e){
+        } catch ( \Exception $e ){
 
             DB::rollback();
 
@@ -116,8 +116,8 @@ class RiceService
 
         DB::table( 'rice' )
             ->where( 'date' , $now )
-            ->where( 'user_id' ,$params[ 'id' ] )
-            ->update(['volume' => $params[ 'rice' ]] );
+            ->where( 'user_id' , $params[ 'id' ] )
+            ->update( ['volume' => $params[ 'rice' ]] );
 
     }
 
@@ -139,11 +139,11 @@ class RiceService
 
         $now = \Carbon\Carbon::now();
 
-        if ($now->hour > 11) {
+        if ( $now->hour > 11 ) {
 
             return $is_open = false;
 
-        } else if($now->hour > 8){
+        } else if( $now->hour > 8 ){
 
             return $is_open = true;
 
@@ -157,11 +157,11 @@ class RiceService
         $now = \Carbon\Carbon::now();
 
         $result = DB::table( 'rice' )
-            ->where( 'date' , $now)
-            ->where( 'winner' ,'>' ,'0' )
+            ->where( 'date' , $now )
+            ->where( 'winner' , '>' ,'0' )
             ->get();
 
-        if(empty($result)){
+        if(empty( $result )){
 
              return false;
 
@@ -201,28 +201,28 @@ WHERE date=:today
 SQL;
 
         $bind = [
-            "today" => $now->format( 'Y-m-d' ),
-            "one_week_ago" => $now->subDay(7)->format( 'Y-m-d' ),
+            "today"        => $now->format( 'Y-m-d' ),
+            "one_week_ago" => $now->subDay( 7 )->format( 'Y-m-d' ),
         ];
 
-        $pickup = DB::select($sql,$bind);
+        $pickup = DB::select( $sql , $bind );
 
         //row->countをkeyにして配列を作成する
         $result = [];
         foreach($pickup as $row ){
-            $tmp   = array_get($result,$row->count,[]);
+            $tmp   = array_get( $result , $row->count , [] );
             $tmp[] = $row;
-            $result[$row->count] = $tmp;
+            $result[ $row->count ] = $tmp;
         }
 
-        $min = min(array_keys($result));
-        $candidate = $result[$min];
+        $min = min( array_keys( $result ) );
+        $candidate = $result[ $min ];
 
         //候補者からランダムに選出
-        $result_key = array_rand($candidate);
-        $winner = $candidate[$result_key];
+        $result_key = array_rand( $candidate );
+        $winner     = $candidate[ $result_key ];
 
-        return (array)$winner;
+        return ( array )$winner;
 
     }
 
@@ -234,7 +234,7 @@ SQL;
 
         $result = DB::table( 'rice' )
             ->leftJoin( 'users' , 'rice.user_id' , '=' , 'users.id' )
-            ->where( 'date' , $now->format( 'Y-m-d' ))
+            ->where( 'date' , $now->format( 'Y-m-d' ) )
             ->select( 'user_id' , 'name' , 'volume' )
             ->get();
 
@@ -247,7 +247,7 @@ SQL;
     protected function getTotalVolume(){
 
         $now = \Carbon\Carbon::now();
-        
+
         $result = DB::table( 'rice' )
             ->where( 'date' , $now->format( 'Y-m-d' ) )
             ->where( 'volume' , '>' , 0 )
@@ -265,7 +265,7 @@ SQL;
         $result = DB::table( 'rice' )
             ->where( 'date' , $now->format( 'Y-m-d' ) )
             ->where( 'volume' , '>' , 0 )
-            ->whereNotIn('user_id', [ $params[ 'id' ] ])
+            ->whereNotIn( 'user_id' , [ $params[ 'id' ] ] )
             ->sum( 'volume' );
 
         return $result;
