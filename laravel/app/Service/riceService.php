@@ -121,39 +121,39 @@ class RiceService
     public function today()
     {
         return json_encode([
-            "status" => "OK",
-            "is_open" => $this->getIsOpen(),
-            "winner" => $this->getWinner(),
+            "status"     => "OK",
+            "is_open"    => $this->getIsOpen(),
+            "winner"     => $this->getWinner(),
             "subscriber" => $this->getSubscriber(),
         ]);
     }
 
+
     //受付中かどうか
     protected function getIsOpen(){
 
-        $today = [
-            'now' => \Carbon\Carbon::now(),
-            'y-m-d' =>  \Carbon\Carbon::now()->format('Y-m-d'),
-        ];
+        $now = \Carbon\Carbon::now();
 
-        if ($today['now']->hour > 11) {
+        if ($now->hour > 11) {
+
             return $is_open = false;
-        } else if($today['now']->hour > 8){
+
+        } else if($now->hour > 8){
+
             return $is_open = true;
+
         }
 
     }
 
+
     public function getTodayWinner(){
 
-        $today = [
-            'now' => \Carbon\Carbon::now(),
-            'y-m-d' =>  \Carbon\Carbon::now()->format('Y-m-d'),
-        ];
+        $now = \Carbon\Carbon::now();
 
-        $result = DB::table('rice')
-            ->where('date', $today['now'])
-            ->where('winner','>','0')
+        $result = DB::table( 'rice' )
+            ->where( 'date' , $now)
+            ->where( 'winner' ,'>' ,'0' )
             ->get();
 
         if(empty($result)){
@@ -168,14 +168,11 @@ class RiceService
 
     }
 
+
     //米を炊く人を選出
     protected function getWinner(){
 
-        $today = [
-            'now' => \Carbon\Carbon::now(),
-            'y-m-d' =>  \Carbon\Carbon::now()->format('Y-m-d'),
-            'one_week_ago' => \Carbon\Carbon::now()->subDay(7)->format('Y-m-d'),
-        ];
+        $now = \Carbon\Carbon::now();
 
         //todo winnerがいたら選出を行わない処理をする
 
@@ -198,15 +195,15 @@ LEFT JOIN (
 WHERE date=:today
 SQL;
         $bind = [
-            "today" => $today['y-m-d'],
-            "one_week_ago" => $today['one_week_ago'],
+            "today" => $now->format( 'Y-m-d' ),
+            "one_week_ago" => $now->subDay(7)->format( 'Y-m-d' ),
         ];
         $pickup = DB::select($sql,$bind);
 
         //row->countをkeyにして配列を作成する
         $result = [];
         foreach($pickup as $row ){
-            $tmp = array_get($result,$row->count,[]);
+            $tmp   = array_get($result,$row->count,[]);
             $tmp[] = $row;
             $result[$row->count] = $tmp;
         }
@@ -222,39 +219,64 @@ SQL;
 
     }
 
-    //本日の申込者を取ってくる
+
+    //本日の申込者を取得
     protected function getSubscriber(){
 
-        $today = [
-            'now' => \Carbon\Carbon::now(),
-            'y-m-d' =>  \Carbon\Carbon::now()->format('Y-m-d'),
-        ];
+        $now = \Carbon\Carbon::now();
 
-        $result = DB::table('rice')
-            ->leftJoin('users', 'rice.user_id', '=', 'users.id')
-            ->where('date', $today['y-m-d'])
-            ->select('user_id', 'name', 'volume')
+        $result = DB::table( 'rice' )
+            ->leftJoin( 'users' , 'rice.user_id' , '=' , 'users.id' )
+            ->where( 'date' , $now->format( 'Y-m-d' ))
+            ->select( 'user_id' , 'name' , 'volume' )
             ->get();
 
         return $result;
 
     }
 
-    //本日の分量を取ってくる
+
+    //本日の分量を取得
     protected function getTotalVolume(){
 
-        $today = [
-            'now' => \Carbon\Carbon::now(),
-            'y-m-d' =>  \Carbon\Carbon::now()->format('Y-m-d'),
-        ];
+        $now = \Carbon\Carbon::now();
 
-        $result = DB::table('rice')
-            ->where('date', $today['y-m-d'])
-            ->where('volume', '>', 0)
-            ->sum('volume');
+        $result = DB::table( 'rice' )
+            ->where( 'date' , $now->format( 'Y-m-d' ) )
+            ->where( 'volume' , '>' , 0 )
+            ->sum( 'volume' );
 
         return $result;
 
     }
+
+
+//    protected function transactionSample()
+//    {
+//        /** @var DatabaseManager $man */
+//        $man = "hoge";
+//        $db = $man->connection();
+//
+//        $db->beginTransaction();
+//        // トランザクションスタート
+//
+//        $db->commit(); // コミット
+//        $db->rollBack(); // ロールバック
+//
+//        try{
+//            $db->transaction(fucntion(){
+//                // 中の処理を自動でコミット
+//
+//                // rollback したい時は Exception投げるだけでOK
+//            });// 自動コミット
+//        }catch (\Exception $e){
+//            // ロールバックはしなくていい
+//            $this->responseBad();
+//        }
+//
+//        DB::transaction();
+//
+//
+//    }
 
 }
