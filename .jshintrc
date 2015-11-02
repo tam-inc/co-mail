@@ -1,0 +1,9 @@
+{
+  "bitwise": true,
+  "latedef": true,
+  "quotmark": true,
+  "unused": true,
+  "sub": false,
+  "jquery": true,
+  "predef": [ "Backbone" ]
+}
