@@ -38,7 +38,7 @@ module.exports = Backbone.Model.extend( {
 	 * modelの状態によってどのビューが表示されるべきかを返す関数
 	 * @returns {String} 表示されるべきviewの名前
 	 */
-	getRenderingViewName: function () {
+	getRenderingViewName: function ( id ) {
 		var user              = this.get( 'user' ),
 			subscriber        = this.get( 'subscriber' ),
 			is_in_apply_time  = this.get( 'is_in_apply_time' ),
@@ -47,7 +47,7 @@ module.exports = Backbone.Model.extend( {
 		if ( !is_in_apply_time && !is_in_result_time ) return 'sleep';
 		if ( is_in_result_time ) return 'result';
 		if ( is_in_apply_time ) {
-			var isDoneApply =  Boolean( _.findWhere( subscriber, { id: user.id } ) );
+			var isDoneApply =  Boolean( _.findWhere( subscriber, { id: id } ) );
 			return ( isDoneApply ) ? 'confirm' : 'apply';
 		}
 		return 'apply';

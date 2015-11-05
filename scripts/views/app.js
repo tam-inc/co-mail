@@ -5,49 +5,51 @@
 
 
 module.exports = Backbone.View.extend( {
-	el: '.bb-main',
+	el: '.app',
+	applyTemplate:   require( '../../handlebars/apply.handlebars' ),
+	confirmTemplate: require( '../../handlebars/confirm.handlebars' ),
+	resultTemplate:  require( '../../handlebars/result.handlebars' ),
 
 	// initializeはnewされた時に実行されるコンストラクタ
 	initialize: function () {
-
-		var UserModel  = require( '../models/rice_me.js' ),
-			TodayModel = require( '../models/rice_today.js' );
-
 		var self = this;
+		var id   = self.model.get( 'id' );
 
-		// user modelのcallback定義
-		var onSuccess = function ( model, response ) {
-			self.model = new TodayModel( { user: response.user } );
-			self.model.startLongPolling();
-			self.listenTo( self.model, 'change:test', self.changeView );
+		var TodayRiceModel = require( '../models/rice_today.js' );
+
+		self.listenTo( self.model, 'change:viewName', self.changeViewTemplates );
+
+		var onSuccess = function ( model ) {
+			self.todayRiceModel = model;
+			var viewName = self.todayRiceModel.getRenderingViewName( id );
+			self.model.set( { viewName: viewName } );
 		};
-		var onFailed = function () {
-			window.location( '/login' );
-		};
 
-		// 自分の認証情報を取得する。失敗した場合は認証画面へ
-		this.userModel = new UserModel;
-		this.userModel.fetch( {
-			success: onSuccess,
-			error:   onFailed
-		} );
-
+		var todayRiceModel = new TodayRiceModel;
+		todayRiceModel.fetch( { success: _.bind( onSuccess, self ) } );
 	},
 
-	// TODO: modelが最初にfetchするタイミングでレンダリングビューを決める
-	changeView: function () {
-		var viewName = this.model.getRenderingViewName();
-		console.log( viewName );
+	changeViewTemplates: function ( model, viewName ) {
+		var self = this;
+		Backbone.history.navigate( viewName );
+		switch ( viewName ) {
+			case 'apply':
+				self.template = self.applyTemplate;
+				break;
+			case 'confirm':
+				self.template = self.confirmTemplate;
+				break;
+			default:
+				self.template = self.resultTemplate;
+		}
+		self.render();
 	},
 
-	// テスト用
-	events: {
-		'click .test': 'onClick'
-	},
-
-	// テスト用
-	onClick: function () {
-		console.log( 'click' );
-		this.model.set( { test: 'test' } );
+	render: function () {
+		var self         = this,
+			template     = self.template,
+			viewTemplate = template( self.model.toJSON() );
+		self.$el.append( viewTemplate );
+		return self;
 	}
 } );
