@@ -20,7 +20,6 @@
   "homepage": "https://github.com/tam-inc/co-mail#readme",
   "dependencies": {
     "backbone": "^1.2.3",
-    "bootstrap-sass": "^3.3.5",
     "gulp": "^3.9.0",
     "gulp-jshint": "^1.11.2",
     "gulp-mocha": "^2.1.3",
