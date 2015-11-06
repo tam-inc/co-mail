@@ -3,7 +3,6 @@
  */
 
 var webpack = require( 'webpack' );
-
 module.exports = {
 	entry: {
 		'main': './scripts/app.js'
@@ -14,7 +13,11 @@ module.exports = {
 	module: {
 		'loaders': [
 			{ test: /\.html/, loader: 'html' },
-			{ test: /\.handlebars$/, loader: "handlebars-loader" }
+			{
+				test: /\.handlebars$/,
+				loader: "handlebars-loader",
+				query: { helperDirs: [ __dirname + '/helpers' ] }
+			}
 		]
 	},
 	plugins: [
