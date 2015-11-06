@@ -6,7 +6,6 @@ module.exports = Backbone.View.extend( {
 	el: '.confirm-form',
 	template: require( '../../../templates/confirm/form.handlebars' ),
 	initialize: function () {
-		console.log( this.model.attributes );
 	},
 	render: function () {
 		var self         = this,
