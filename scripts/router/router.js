@@ -4,18 +4,26 @@
 
 module.exports = Backbone.Router.extend( {
 	todayModel: null,
-	routes: {
-		'':      'start',
-		'apply': 'apply'
-	},
 	initialize: function ( options ) {
-		this.model = options.model;
+		var self       = this;
+		var TodayModel = require( '../models/rice/today.js' );
+
+		self.model      = options.model;
+		self.todayModel = new TodayModel;
+
+		self.listenTo( self.todayModel, 'change:viewName', self.changeView );
+
+		var onSuccess = function () {
+			var user     = self.model.get( 'user' ),
+				id       = user.id,
+				viewName = self.todayModel.getRenderingViewName( id );
+			self.todayModel.set( { viewName: viewName } );
+		};
+
+		self.todayModel.fetch( { success: onSuccess } );
 	},
-	apply: function () {
-		console.log( 'apply route' );
-	},
-	start: function () {
-		console.log( 'start route' );
-		Backbone.history.navigate( '/apply' );
+
+	changeView: function ( model, viewName ) {
+		Backbone.history.navigate( '/' + viewName );
 	}
 } );
