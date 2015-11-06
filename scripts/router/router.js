@@ -9,14 +9,12 @@ module.exports = Backbone.Router.extend( {
 		var TodayModel = require( '../models/rice/today.js' );
 
 		self.model      = options.model;
-		self.todayModel = new TodayModel;
+		self.todayModel = new TodayModel( { user: self.model.get( 'user' ) } );
 
 		self.listenTo( self.todayModel, 'change:viewName', self.changeView );
 
 		var onSuccess = function () {
-			var user     = self.model.get( 'user' ),
-				id       = user.id,
-				viewName = self.todayModel.getRenderingViewName( id );
+			var viewName = self.todayModel.getRenderingViewName();
 			self.todayModel.set( { viewName: viewName } );
 		};
 
