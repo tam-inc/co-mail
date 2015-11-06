@@ -29,7 +29,7 @@ gulp.task( 'server', function () {
 } );
 
 gulp.task( 'watch', [ 'webpack' ], function () {
-	gulp.watch( [ './scripts/**/*.js' ], [ 'webpack' ] );
+	gulp.watch( [ './scripts/**/*.js', './templates/**/*.handlebars' ], [ 'webpack' ] );
 } );
 
 gulp.task( 'default', [ 'watch', 'server' ] );
