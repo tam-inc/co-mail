@@ -17,6 +17,7 @@ module.exports = Backbone.Model.extend( {
 		if ( !is_in_apply_time && !is_in_result_time ) return 'sleep';
 		if ( is_in_result_time ) return 'result';
 		if ( is_in_apply_time ) {
+			// 自身のユーザIDが申し込み一覧にあるかどうか調べる、あればisDoneApplyはtrue
 			var isDoneApply =  Boolean( _.findWhere( subscriber, { id: user.id } ) );
 			return ( isDoneApply ) ? 'confirm' : 'apply';
 		}
