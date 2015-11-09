@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Service\RiceService;
-use App\Service\UserService;
 use Socialite;
 use Session;
 use Request;
@@ -17,23 +16,33 @@ class RiceController extends Controller
     // /rice/apply
     protected function recept( RiceService $riceService )
     {
+        
+        //本来はsessionを使用。作業用にinputからの値を使用できるようにしている
+        if( Request::input( 'id' ) ){
+
+            $id = Request::input( 'id' );
+
+        } else {
+
+            $id = Session::get( 'auth' );
+
+        };
 
         $params = [
-//            'id' => Session::get( 'auth' ),
-            'id'   => Request::input( 'id' ),
+            'id'   => $id,
             'rice' => Request::input( 'rice' ),
         ];
 
         if( $params[ 'id' ] && $params[ 'rice' ] ){
 
             //限界値チェック
-            $is_limit = $this->limitCheck( $params , $riceService );
+            $is_limit = $riceService->limitCheck( $params , $riceService );
 
             if($is_limit){
 
                 return $this->responseBad([
 
-                    "message" => "本日申し込める量を超えています。"
+                    "message" => "本日申し込み可能な量を超えています。",
 
                 ]);
 
