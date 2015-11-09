@@ -61,23 +61,6 @@ class RiceService
 
     }
 
-
-    //申込済みかチェック
-    protected function appliedCheck( $params ){
-
-        $now = \Carbon\Carbon::now();
-
-        //申込済みかどうかチェック
-        $applied_data = DB::table( 'rice' )
-            ->where( 'date' , $now )
-            ->where( 'user_id' , $params[ 'id' ] )
-            ->first();
-
-        return $applied_data;
-
-    }
-
-
     //申込内容を削除
     protected function deleteApplyData( $params ){
 
@@ -109,120 +92,147 @@ class RiceService
     }
 
 
-    //申込内容変更
-    protected function updateApplyData( $params ){
-
-        $now = \Carbon\Carbon::now();
-
-        DB::table( 'rice' )
-            ->where( 'date' , $now )
-            ->where( 'user_id' , $params[ 'id' ] )
-            ->update( ['volume' => $params[ 'rice' ]] );
-
-    }
-
-
     //現在の受付状況等をJSONで返す
     public function today()
     {
+
         return json_encode([
             "status"     => "OK",
-            "is_open"    => $this->getIsOpen(),
-            "winner"     => $this->getWinner(),
             "subscriber" => $this->getSubscriber(),
+            "winner"     => $this->getTodayWinner(),
+            "is_in_apply_time"  => $this->getInApplyTime(),
+            "is_in_result_time" => $this->getInResultTime(),
         ]);
+
     }
 
 
-    //受付中かどうか
-    protected function getIsOpen(){
+    //申し込み可能時間かどうか
+    protected function getInApplyTime(){
 
         $now = \Carbon\Carbon::now();
 
-        if ( $now->hour > 11 ) {
+        if ( $now->hour > 12 ) {
 
-            return $is_open = false;
+            $is_open = false;
 
         } else if( $now->hour > 8 ){
 
-            return $is_open = true;
+            $is_open = true;
+
+        }
+
+        return $is_open;
+    }
+
+
+    //結果発表中かどうか
+    protected function getInResultTime(){
+
+        $now = \Carbon\Carbon::now();
+
+        $winner = $this->getTodayWinner();
+
+        if ( $winner ) {
+
+            return true;
+
+        } else {
+
+            return false;
 
         }
 
     }
 
 
-    public function getTodayWinner(){
+    //米を炊く人を取得
+    protected function getTodayWinner(){
 
         $now = \Carbon\Carbon::now();
 
-        $result = DB::table( 'rice' )
-            ->where( 'date' , $now )
+        $winner = DB::table( 'rice' )
+            ->leftJoin( 'users' , 'rice.user_id' , '=' , 'users.id' )
+            ->where( 'date' , $now->format( 'Y-m-d' ) )
             ->where( 'winner' , '>' ,'0' )
+            ->select( 'user_id' , 'name' )
             ->get();
 
-        if(empty( $result )){
-
-             return false;
-
-        } else {
-
-            return true;
-
-        }
+        return $winner;
 
     }
 
 
     //米を炊く人を選出
-    protected function selectWinner(){
+    public function selectWinner(){
 
         $now = \Carbon\Carbon::now();
 
-        //todo winnerがいたら選出を行わない処理をする
+        $winner = $this->getTodayWinner();
 
-        $sql = <<<SQL
+        if( !$winner ){
+
+            $sql = <<<SQL
 SELECT
-	rice.id,
-	rice.user_id,
-	users.name AS name,
-	COALESCE(count_table.count,0) as count
+    rice.id,
+    rice.user_id,
+    users.name AS name,
+    COALESCE(count_table.count,0) as count
 FROM (rice LEFT JOIN users ON rice.user_id = users.id)
 LEFT JOIN (
-	SELECT
-		user_id,
-		count(*) as count
-	FROM rice
-	where date BETWEEN :one_week_ago AND :today
-	and winner = '1'
-	group by user_id
+    SELECT
+        user_id,
+        count(*) as count
+    FROM rice
+    where date BETWEEN :one_week_ago AND :today
+    and winner = '1'
+    group by user_id
 ) as count_table ON count_table.user_id = rice.user_id
 WHERE date=:today
 SQL;
 
-        $bind = [
-            "today"        => $now->format( 'Y-m-d' ),
-            "one_week_ago" => $now->subDay( 7 )->format( 'Y-m-d' ),
-        ];
+            $bind = [
+                "today"        => $now->format( 'Y-m-d' ),
+                "one_week_ago" => $now->subDay( 7 )->format( 'Y-m-d' ),
+            ];
 
-        $pickup = DB::select( $sql , $bind );
+            $pickup = DB::select( $sql , $bind );
 
-        //row->countをkeyにして配列を作成する
-        $result = [];
-        foreach($pickup as $row ){
-            $tmp   = array_get( $result , $row->count , [] );
-            $tmp[] = $row;
-            $result[ $row->count ] = $tmp;
+            //row->countをkeyにして配列を作成する
+            $result = [];
+            foreach($pickup as $row ){
+                $tmp   = array_get( $result , $row->count , [] );
+                $tmp[] = $row;
+                $result[ $row->count ] = $tmp;
+            }
+
+            $min = min( array_keys( $result ) );
+            $candidate = $result[ $min ];
+
+            //候補者からランダムに選出
+            $result_key = array_rand( $candidate );
+            $winner     = $candidate[ $result_key ];
+
+            $this->insertWinner( $winner );
+
+        } else {
+
+            return $winner;
+
         }
 
-        $min = min( array_keys( $result ) );
-        $candidate = $result[ $min ];
+    }
 
-        //候補者からランダムに選出
-        $result_key = array_rand( $candidate );
-        $winner     = $candidate[ $result_key ];
 
-        return ( array )$winner;
+    //本日の米を炊く人をDBに入れる
+    protected function insertWinner( $winner ){
+
+        $now = \Carbon\Carbon::now();
+
+        DB::table( 'rice' )
+            ->where( 'date' ,  $now->format( 'Y-m-d' ) )
+            ->where( 'user_id' , '=' , $winner->user_id )
+            ->update( ['winner' => 1] );
 
     }
 

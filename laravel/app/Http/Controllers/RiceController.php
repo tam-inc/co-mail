@@ -63,26 +63,8 @@ class RiceController extends Controller
 
         $result = $riceService->today();
 
+        //todo trait使用
         return $result;
-
-    }
-
-
-    protected function limitCheck( $params , $riceService ){
-
-        $is_limit = $riceService->limitCheck( $params );
-
-        return $is_limit;
-
-    }
-
-
-    protected function getTodayWinner( RiceService $riceService )
-    {
-
-        $result = $riceService->getTodayWinner();
-
-        return [$result];
 
     }
 
