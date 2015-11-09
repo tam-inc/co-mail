@@ -1,0 +1,25 @@
+#php
+language: php
+
+php:
+  - 5.6
+
+addons:
+  postgresql: "9.4"
+
+services:
+  - postgresql
+
+before_install:
+  - composer install
+  - chmod -R 777 laravel/storage
+
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+
+script:
+  - vendor/bin/phpunit laravel
+
+notifications:
+  slack:
+    secure: X465Ts8a/yDuwdir6HEdFIuBVQbV5NFn9xKyHufXl8m6uzc2yAAG5AjS2cAklsQ0uOlJHCR6WelqGsfIBQracehdAS+/EicC/G/msgVFq4KkJy3WGec8J2kKHDKGGbiCEwJ8Pni3L+g3dd20RiVOjBbeFTBL4KPMZKOLkUorL0zB8rUSEfS4AehMEiZdpRfEtSNj1hO29Lsm64kUFQv6KPccAYwX9AnYKGKxCApqZz03TBhPHnXh9tUIlCRD8GMXTBLomMVAYgA1+tuiOsRR1edFkUcLyaBd6z2KovY89S7ms84Wuxip3ecj/sr3FpGYTA4PPdTR+hhQTJpJUQ+5CcO7nlc07P+MyEXjOzD+bL6kNAzp6Qh6hOxclHXdIbpFt+mupIScsMpo4QaFyWGocH1lZNQbpJnR2S/ASOmAX9pHFlp8BtO8sEQPvi4vp07E6AayB7A1hdP+NjeETebDEC9HH292kSvrwr+tAnfW4DQVXhRM8wxJHRZrqJuc2RgS+dg2ybEgjdYjc7XNJoxeOOYRZ0W60SBN8qa+X1euv63Adhuib5TDQbuyQGYGPe/hR4ted9LmP7RfDABS1VNT9/kFvZeBdcqou0+mYzP5+H9nNKbNi/O3WSXNzuYtOOVtNgxyIk5HbCrJXHa+8Ix7xE87EAICzfJOfZ8uYBfoQR8=
