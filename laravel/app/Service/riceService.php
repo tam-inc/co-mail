@@ -95,15 +95,15 @@ class RiceService
     //現在の受付状況等をJSONで返す
     public function today()
     {
-
-        return json_encode([
-            "status"     => "OK",
-            "subscriber" => $this->getSubscriber(),
-            "winner"     => $this->getTodayWinner(),
-            "is_in_apply_time"  => $this->getInApplyTime(),
-            "is_in_result_time" => $this->getInResultTime(),
-        ]);
-
+        //レスポンス用にデータを整形
+        $data = $this->formatResponseData();
+        
+        return [
+            "subscriber"        => $data['subscriber'],
+            "winner"            => $data['winner'],
+            "is_in_apply_time"  => $this->isInApplyTime(),
+            "is_in_result_time" => $this->isInResultTime()
+        ];
     }
 
 
@@ -111,12 +111,28 @@ class RiceService
     protected function getInApplyTime(){
 
         $now = \Carbon\Carbon::now();
+    //レスポンス用にデータを整形
+    protected function formatResponseData(){
+        //winnerをレスポンス用に整形
+        $winner = $this->getTodayWinner();
+        if (empty($winner)) {
+            //空の配列を空のオブジェクトに変換
+            $winner = new \stdClass();
+        } else {
+            //user_idをidに変換
+            $winner = $this->changeUserIDToID($winner)[0];
+        };
 
-        if ( $now->hour > 12 ) {
+        //subscriberをレスポンス用に整形
+        $subscriber = $this->changeUserIDToID($this->getSubscriber());
 
-            $is_open = false;
+        $data = [
+            'winner'    => $winner,
+            'subscriber'=> $subscriber
+        ];
 
-        } else if( $now->hour > 8 ){
+        return $data;
+    }
 
             $is_open = true;
 
@@ -249,7 +265,18 @@ SQL;
             ->get();
 
         return $result;
+    //user_idをidに変換する
+    protected function changeUserIDToID($data)
+    {
+        $result = [];
 
+        foreach ($data as $i) {
+            $i->id = $i->user_id;
+            unset($i->user_id);
+            array_push($result, $i);
+        }
+
+        return $result;
     }
 
 
