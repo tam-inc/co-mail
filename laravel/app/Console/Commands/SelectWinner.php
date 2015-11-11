@@ -20,7 +20,7 @@ class SelectWinner extends Command
      *
      * @var string
      */
-    protected $description = 'insert todays winner' ;
+    protected $description = 'select todays winner' ;
 
     /**
      * Execute the console command.
@@ -30,8 +30,6 @@ class SelectWinner extends Command
 
     public function handle( RiceService $riceService )
     {
-
         $riceService->selectWinner();
-
     }
 }
