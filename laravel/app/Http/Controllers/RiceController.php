@@ -69,12 +69,14 @@ class RiceController extends Controller
     // /rice/today
     protected function today( RiceService $riceService )
     {
+        $data = $riceService->today();
 
-        $result = $riceService->today();
-
-        //todo trait使用
-        return $result;
-
+        return $this->responseOk([
+            "winner"            => $data['winner'],
+            "subscriber"        => $data['subscriber'],
+            "is_in_apply_time"  => $data['is_in_apply_time'],
+            "is_in_result_time" => $data['is_in_result_time']
+        ]);
     }
 
 }
