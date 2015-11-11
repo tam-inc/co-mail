@@ -1,10 +1,10 @@
 <h2>申し込み</h2>
-<form novalidate="novalidate">
+<div>
 	<select name="rice_quantity" id="rice_quantity" class="rice_quantity">
-		<option value="0.3"{{#equal rice '0.3'}} selected="selected"{{/equal}}>小盛</option>
-		<option value="0.5"{{#equal rice '0.5'}} selected="selected"{{/equal}}>並盛</option>
-		<option value="0.7"{{#equal rice '0.7'}} selected="selected"{{/equal}}>中盛</option>
-		<option value="1.0"{{#equal rice '1.0'}} selected="selected"{{/equal}}>大盛</option>
+		<option value="0.3"{{#equal rice '0.3'}} selected="selected"{{/equal}}>小盛 - 0.3合</option>
+		<option value="0.5"{{#equal rice '0.5'}} selected="selected"{{/equal}}>並盛 - 0.5合</option>
+		<option value="0.7"{{#equal rice '0.7'}} selected="selected"{{/equal}}>中盛 - 0.7合</option>
+		<option value="1.0"{{#equal rice '1.0'}} selected="selected"{{/equal}}>大盛 - 1.0合</option>
 	</select>
 	<button class="button button-block">訂正する</button>
-</form>
+</div>
