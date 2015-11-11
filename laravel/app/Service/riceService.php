@@ -9,86 +9,62 @@ use DB;
  * Date: 2015/10/22
  * Time: 14:28
  */
-
 class RiceService
 {
-
-    public function limitCheck( $params )
+    //本日の申込可能量を超えていないかチェック
+    public function limitCheck($params)
     {
+        $limit_volume = (float)env('TOKYO_LIMIT');
+        $today_volume = (float)$this->getTotalVolumeNotSelf($params);
 
-        //todo 限界値が決め打ちになっているのでどこかに変数で持つ
-        $limit_volume      = ( float )10;
+        //本日の申込可能量
+        $acceptable_volume = $limit_volume - $today_volume;
 
-        $today_volume      = ( float )$this->getTotalVolumeNotSelf( $params );
-
-        $residual_quantity = $limit_volume - $today_volume;
-
-        //updateする量が申込可能値以上かチェック
-        if( $residual_quantity >= $params[ 'rice' ] ){
-
-            $is_limit = false;
-
-        } else {
-
-            $is_limit = true;
-
-        }
-
-        return $is_limit;
-
+        //updateする量が申込可能量を超えていないか判定
+        return !($acceptable_volume >= $params['rice']);
     }
 
 
     //申し込む
-    public function apply( $params )
+    public function apply($params)
     {
-
         try {
-
             DB::beginTransaction();
-
-                $this->deleteApplyData( $params );
-
-                $this->insertApplyData( $params );
-
+            $this->deleteApplyData($params);
+            $this->insertApplyData($params);
             DB::commit();
-
-        } catch ( \Exception $e ){
-
+        } catch (\Exception $e) {
             DB::rollback();
-
         };
-
     }
+
 
     //申込内容を削除
-    protected function deleteApplyData( $params ){
-
+    protected function deleteApplyData($params)
+    {
         $now = \Carbon\Carbon::now();
 
-        DB::table( 'rice' )
-            ->where( 'date' , $now )
-            ->where( 'user_id' , $params[ 'id' ] )
+        DB::table('rice')
+            ->where('date', $now->format('Y-m-d'))
+            ->where('user_id', $params['id'])
             ->delete();
-
     }
 
-    //新規申込
-    protected function insertApplyData( $params ){
 
+    //新規申込
+    protected function insertApplyData($params)
+    {
         $now = \Carbon\Carbon::now();
 
-        DB::table( 'rice' )->insert([
-
+        DB::table('rice')->insert([
             'winner'     => 0,
-            'date'       => $now,
-            'user_id'    => $params[ 'id' ],
-            'volume'     => $params[ 'rice' ],
+            'date'       => $now->format('Y-m-d'),
+            'user_id'    => $params['id'],
+            'volume'     => $params['rice'],
+            'area'       => 0,
             'created_at' => $now->toDateTimeString(),
             'updated_at' => $now->toDateTimeString(),
-
-            ]);
-
+        ]);
     }
 
 
@@ -107,10 +83,6 @@ class RiceService
     }
 
 
-    //申し込み可能時間かどうか
-    protected function getInApplyTime(){
-
-        $now = \Carbon\Carbon::now();
     //レスポンス用にデータを整形
     protected function formatResponseData(){
         //winnerをレスポンス用に整形
@@ -134,61 +106,50 @@ class RiceService
         return $data;
     }
 
-            $is_open = true;
 
-        }
+    //申し込み可能時間かどうか
+    protected function isInApplyTime()
+    {
+        $now = \Carbon\Carbon::now();
 
-        return $is_open;
+        if ($now->format('H:i') > $now->hour(11)->minute(40)->format('H:i')) return false;
+        if ($now->format('H') > $now->hour(8)->format('H')) return true;
+        return false;
     }
 
 
     //結果発表中かどうか
-    protected function getInResultTime(){
-
-        $now = \Carbon\Carbon::now();
-
+    protected function isInResultTime()
+    {
         $winner = $this->getTodayWinner();
-
-        if ( $winner ) {
-
-            return true;
-
-        } else {
-
-            return false;
-
-        }
-
+        return !(empty($winner));
     }
 
 
     //米を炊く人を取得
-    protected function getTodayWinner(){
-
+    protected function getTodayWinner()
+    {
         $now = \Carbon\Carbon::now();
 
-        $winner = DB::table( 'rice' )
-            ->leftJoin( 'users' , 'rice.user_id' , '=' , 'users.id' )
-            ->where( 'date' , $now->format( 'Y-m-d' ) )
-            ->where( 'winner' , '>' ,'0' )
-            ->select( 'user_id' , 'name' )
+        $winner = DB::table('rice')
+            ->leftJoin('users', 'rice.user_id', '=', 'users.id')
+            ->where('date', $now->format('Y-m-d'))
+            ->where('winner', '>', '0')
+            ->select('user_id', 'name')
             ->get();
 
         return $winner;
-
     }
 
-
     //米を炊く人を選出
-    public function selectWinner(){
-
+    public function selectWinner()
+    {
         $now = \Carbon\Carbon::now();
 
         $winner = $this->getTodayWinner();
+        if (!empty($winner)) return $winner;
 
-        if( !$winner ){
-
-            $sql = <<<SQL
+        $sql = <<<SQL
 SELECT
     rice.id,
     rice.user_id,
@@ -200,71 +161,52 @@ LEFT JOIN (
         user_id,
         count(*) as count
     FROM rice
-    where date BETWEEN :one_week_ago AND :today
+    where date BETWEEN :search_start_day AND :today
     and winner = '1'
     group by user_id
 ) as count_table ON count_table.user_id = rice.user_id
 WHERE date=:today
+ORDER BY count,RANDOM()
 SQL;
 
-            $bind = [
-                "today"        => $now->format( 'Y-m-d' ),
-                "one_week_ago" => $now->subDay( 7 )->format( 'Y-m-d' ),
-            ];
+        $bind = [
+            "today" => $now->format('Y-m-d'),
+            "search_start_day" => $now->subDay(7)->format('Y-m-d'),
+        ];
 
-            $pickup = DB::select( $sql , $bind );
+        $pickup = DB::select($sql, $bind);
 
-            //row->countをkeyにして配列を作成する
-            $result = [];
-            foreach($pickup as $row ){
-                $tmp   = array_get( $result , $row->count , [] );
-                $tmp[] = $row;
-                $result[ $row->count ] = $tmp;
-            }
-
-            $min = min( array_keys( $result ) );
-            $candidate = $result[ $min ];
-
-            //候補者からランダムに選出
-            $result_key = array_rand( $candidate );
-            $winner     = $candidate[ $result_key ];
-
-            $this->insertWinner( $winner );
-
-        } else {
-
-            return $winner;
-
-        }
-
+        $this->insertWinner($pickup[0]);
     }
 
 
     //本日の米を炊く人をDBに入れる
-    protected function insertWinner( $winner ){
-
+    protected function insertWinner($winner)
+    {
         $now = \Carbon\Carbon::now();
 
-        DB::table( 'rice' )
-            ->where( 'date' ,  $now->format( 'Y-m-d' ) )
-            ->where( 'user_id' , '=' , $winner->user_id )
-            ->update( ['winner' => 1] );
-
+        DB::table('rice')
+            ->where('date', $now->format('Y-m-d'))
+            ->where('user_id', '=', $winner->user_id)
+            ->update(['winner' => 1]);
     }
 
 
     //本日の申込者を取得
-    protected function getSubscriber(){
-
+    protected function getSubscriber()
+    {
         $now = \Carbon\Carbon::now();
 
-        $result = DB::table( 'rice' )
-            ->leftJoin( 'users' , 'rice.user_id' , '=' , 'users.id' )
-            ->where( 'date' , $now->format( 'Y-m-d' ) )
-            ->select( 'user_id' , 'name' , 'volume' )
+        $subscriber = DB::table('rice')
+            ->leftJoin('users', 'rice.user_id', '=', 'users.id')
+            ->where('date', $now->format('Y-m-d'))
+            ->select('user_id', 'name', 'volume')
             ->get();
 
-        return $result;
+        return $subscriber;
+    }
+
+
     //user_idをidに変換する
     protected function changeUserIDToID($data)
     {
@@ -281,32 +223,30 @@ SQL;
 
 
     //本日の総申込量を取得
-    protected function getTotalVolume(){
-
+    protected function getTotalVolume()
+    {
         $now = \Carbon\Carbon::now();
 
-        $result = DB::table( 'rice' )
-            ->where( 'date' , $now->format( 'Y-m-d' ) )
-            ->where( 'volume' , '>' , 0 )
-            ->sum( 'volume' );
+        $result = DB::table('rice')
+            ->where('date', $now->format('Y-m-d'))
+            ->where('volume', '>', 0)
+            ->sum('volume');
 
         return $result;
-
     }
+
 
     //本日の自分以外の総申込量を取得
-    public function getTotalVolumeNotSelf( $params ){
-
+    public function getTotalVolumeNotSelf($params)
+    {
         $now = \Carbon\Carbon::now();
 
-        $result = DB::table( 'rice' )
-            ->where( 'date' , $now->format( 'Y-m-d' ) )
-            ->where( 'volume' , '>' , 0 )
-            ->whereNotIn( 'user_id' , [ $params[ 'id' ] ] )
-            ->sum( 'volume' );
+        $result = DB::table('rice')
+            ->where('date', $now->format('Y-m-d'))
+            ->where('volume', '>', 0)
+            ->whereNotIn('user_id', [$params['id']])
+            ->sum('volume');
 
         return $result;
-
     }
-
 }
