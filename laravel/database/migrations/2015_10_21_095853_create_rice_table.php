@@ -18,6 +18,7 @@ class CreateRiceTable extends Migration
             $table->date('date');
             $table->float('volume');
             $table->string('winner');
+            $table->integer('area');
             $table->timestamps();
         });
     }
