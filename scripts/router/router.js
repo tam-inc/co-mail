@@ -17,12 +17,7 @@ module.exports = Backbone.Router.extend( {
 
 		self.listenTo( self.todayModel, 'change:viewName', self.changeView );
 
-		var onSuccess = function () {
-			var viewName = self.todayModel.getRenderingViewName();
-			self.todayModel.set( { viewName: viewName } );
-		};
-
-		self.todayModel.fetch( { success: onSuccess } );
+		self.todayModel.fetch();
 	},
 
 	changeView: function ( model, viewName ) {

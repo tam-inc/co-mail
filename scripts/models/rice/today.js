@@ -4,11 +4,17 @@
 
 module.exports = Backbone.Model.extend( {
 	url: 'http://tambourine.herokuapp.com/v1/rice/today',
+	// このModelがInstance化されている時、通信成功するとviewNameをsetする
+	initialize: function () {
+		var self = this;
+		self.listenTo( self, 'sync', self.setViewName );
+	},
 	/**
 	 * modelの状態によってどのビューが表示されるべきかを返す関数
 	 * @returns {String} 表示されるべきviewの名前
 	 */
 	getRenderingViewName: function () {
+		// userはnewされる時に渡されている
 		var user              = this.get( 'user' ),
 			subscriber        = this.get( 'subscriber' ),
 			is_in_apply_time  = this.get( 'is_in_apply_time' ),
@@ -22,5 +28,9 @@ module.exports = Backbone.Model.extend( {
 			return ( isDoneApply ) ? 'confirm' : 'apply';
 		}
 		return 'apply';
+	},
+	setViewName: function () {
+		var viewName = this.getRenderingViewName();
+		this.set( { viewName: viewName } );
 	}
 } );
