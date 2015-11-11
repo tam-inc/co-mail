@@ -12,29 +12,22 @@
 */
 
 //ログインしているかチェック
-Route::get('/rice/me','AuthController@getUser');
+Route::get('/tokyo/rice/me', 'AuthController@getUser');
 
 //申し込みを受け付ける
-Route::post('/rice/apply', 'RiceController@recept');
+Route::post('/tokyo/rice/apply', 'RiceController@receive');
 
 //コメールの状態を返す
-Route::get('/rice/today', 'RiceController@today');
+Route::get('/tokyo/rice/today', 'RiceController@today');
 
 //google認証
-Route::get('/rice/auth','AuthController@auth');
+Route::get('/rice/auth', 'AuthController@auth');
 
 //google認証コールバック
-Route::get('/rice/auth/callback','AuthController@googleCallback');
+Route::get('/rice/auth/callback', 'AuthController@googleCallback');
 
 
 //以下作業用
-Route::get('/', function () {
-    $session = Session::get('auth');
-    var_dump($session);
-});
-
-Route::get('/win', 'RiceController@getTodayWinner');
-
 Route::get('/session', function () {
     Session::forget('auth');
 });
