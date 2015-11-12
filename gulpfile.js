@@ -6,7 +6,8 @@ var gulp           = require( 'gulp' ),
 	webpack        = require( 'webpack-stream' ),
 	webpack_config = require( './webpack.config.js' ),
 	browserSync    = require( 'browser-sync' ),
-	history        = require( 'connect-history-api-fallback' );
+	history        = require( 'connect-history-api-fallback' ),
+	shell          = require( 'gulp-shell' );
 
 gulp.task( 'webpack', function () {
 	return gulp.src( [ 'scripts/app.js' ] )
@@ -22,14 +23,19 @@ gulp.task( 'server', function () {
 		server: {
 			baseDir: './public',
 			middleware: [ history( {
+				// TODO: tokyo, osakaで変更します
 				rewrites: [ { from: /\/comail/, to: '/comail/index.html' } ]
 			} ) ]
 		}
 	} )
 } );
 
+gulp.task( 'php', function () {
+	shell( 'php -S localhost:8000 -t public' )
+} );
+
 gulp.task( 'watch', [ 'webpack' ], function () {
 	gulp.watch( [ './scripts/**/*.js', './templates/**/*.handlebars' ], [ 'webpack' ] );
 } );
 
-gulp.task( 'default', [ 'watch', 'server' ] );
+gulp.task( 'default', [ 'watch', 'php', 'server' ] );
