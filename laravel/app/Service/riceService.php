@@ -111,9 +111,11 @@ class RiceService
     protected function isInApplyTime()
     {
         $now = \Carbon\Carbon::now();
+        $limit_time = $now->copy()->hour(11)->minute(40);
+        $apply_start_time = $now->copy()->hour(8);
 
-        if ($now->format('H:i') > $now->hour(11)->minute(40)->format('H:i')) return false;
-        if ($now->format('H') > $now->hour(8)->format('H')) return true;
+        if ($now > $limit_time) return false;
+        if ($now > $apply_start_time) return true;
         return false;
     }
 
