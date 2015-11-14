@@ -35,7 +35,7 @@ class RiceController extends Controller
         }
 
         //限界値チェック
-        $is_limit = $riceService->limitCheck($params, $riceService);
+        $is_limit = $riceService->limitCheck($params);
 
         //申込可能値を超えていた場合はエラーを返す
         if ($is_limit) {
