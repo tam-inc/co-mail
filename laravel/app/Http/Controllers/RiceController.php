@@ -41,7 +41,7 @@ class RiceController extends Controller
         if ($is_limit) {
             return $this->responseBad([
                 "message" => "本日申し込み可能な量を超えています。",
-            ]);
+            ], 403);
         }
 
         //申し込む

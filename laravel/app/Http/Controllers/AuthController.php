@@ -20,7 +20,7 @@ class AuthController extends Controller
         if (!$session) {
             return $this->responseBad([
                 "message" => "ログインしていません。",
-            ]);
+            ], 403);
         }
 
         //セッションからユーザー情報を取得
