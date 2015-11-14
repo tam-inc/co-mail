@@ -216,17 +216,20 @@ SQL;
 
 
     //user_idをidに変換する
-    protected function changeUserIDToID($data)
+    protected function changeUserIDToID($userArr)
     {
-        $result = [];
+        $resultArr = [];
 
-        foreach ($data as $i) {
-            $i->id = $i->user_id;
-            unset($i->user_id);
-            array_push($result, $i);
+        foreach ($userArr as $user) {
+            //user_idがある場合
+            if (isset($user->user_id)) {
+                $user->id = $user->user_id;
+                unset($user->user_id);
+            }
+            array_push($resultArr, $user);
         }
 
-        return $result;
+        return $resultArr;
     }
 
 
