@@ -143,13 +143,19 @@ class RiceService
         return $winner;
     }
 
+
     //米を炊く人を選出
     public function selectWinner()
     {
         $now = \Carbon\Carbon::now();
 
+        //申込者がいない場合
+        $subscriber = $this->getSubscriber();
+        if (empty($subscriber)) return;
+
+        //winnerがいない場合
         $winner = $this->getTodayWinner();
-        if (!empty($winner)) return $winner;
+        if (!empty($winner)) return;
 
         $sql = <<<SQL
 SELECT
