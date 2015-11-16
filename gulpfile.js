@@ -39,3 +39,5 @@ gulp.task( 'watch', [ 'webpack' ], function () {
 } );
 
 gulp.task( 'default', [ 'watch', 'php', 'server' ] );
+
+// TODO: gulpでjshint一応走らせる・mochaのテストをタスク化する

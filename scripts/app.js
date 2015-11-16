@@ -10,6 +10,7 @@ jQuery( function () {
 		new Router( { model: model } );
 		Backbone.history.start( {
 			pushState: true,
+			// TODO: tokyo/osakaに切り替える
 			root: '/comail/'
 		} );
 	};

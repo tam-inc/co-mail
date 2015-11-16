@@ -3,12 +3,13 @@
  */
 
 module.exports = Backbone.View.extend( {
+
 	el: '.app',
 	template:   require( '../../templates/confirm.handlebars' ),
+
 	FormView:   require( './confirm/form.js' ),
 	ApplyModel: require( '../models/rice/apply.js' ),
-	initialize: function () {
-	},
+
 	render: function () {
 		var self         = this,
 			template     = self.template,
@@ -17,6 +18,9 @@ module.exports = Backbone.View.extend( {
 		self.assign();
 		return self;
 	},
+
+	// 親Viewのrenderが終わってから子Viewをつくる
+	// TODO: これ非同期じゃない？メソッド分けてもダメじゃない？という検証
 	assign: function () {
 		var user         = this.model.get( 'user' ),
 			subscriber   = this.model.get( 'subscriber' ),
