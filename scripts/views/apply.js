@@ -3,6 +3,10 @@
  */
 
 module.exports = Backbone.View.extend( {
+
+	el: '.app',
+	template: require( '../../templates/apply.handlebars' ),
+
 	className: 'apply',
 	initialize: function () {
 		console.log( this );
