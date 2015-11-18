@@ -9,40 +9,40 @@ use DB;
  * Date: 2015/10/22
  * Time: 14:28
  */
+class UserService
+{
 
+    public function createUser($google_info, $google_id)
+    {
+        $now = \Carbon\Carbon::now();
 
-class UserService{
-
-    public function createUser($google_info){
-
-            DB::table('users')->insert([
-                'google_id' => $google_info->getId(),
-                'name' => $google_info->getName(),
-                'email' => $google_info->getEmail(),
-                'created_at' => \Carbon\Carbon::now()->toDateTimeString(),
-                'updated_at' => \Carbon\Carbon::now()->toDateTimeString(),
-            ]);
-
-            $user = DB::table('users')->where('google_id',$google_id)->first();
-
-        return $user;
-
+        DB::table('users')->insert([
+            'google_id'  => $google_id,
+            'name'       => $google_info->getName(),
+            'email'      => $google_info->getEmail(),
+            'created_at' => $now->toDateTimeString(),
+            'updated_at' => $now->toDateTimeString(),
+        ]);
     }
-
 
     public function getUser($id)
     {
-        $user = DB::table('users')->where('id', $id)->first();
+        $user = DB::table('users')
+            ->where('id', $id)
+            ->select('id', 'name', 'email')
+            ->first();
 
-        return json_encode([
-            "session" => $id,
-            "status" => "OK",
-            "user" => [
-                "id" => $user->id,
-                "name" => $user->name,
-                "email" => $user->email,
-            ]
-        ]);
+        return $user;
+    }
+
+    public function getUserByGoogleID($google_id)
+    {
+        $user = DB::table('users')
+            ->where('google_id', $google_id)
+            ->select('id')
+            ->first();
+
+        return $user;
     }
 }
 

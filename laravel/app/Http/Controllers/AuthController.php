@@ -5,43 +5,60 @@ namespace App\Http\Controllers;
 use App\Service\UserService;
 use Socialite;
 use Session;
-use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
+    use RestControllerTrait;
+
+    //ログインチェック
+    public function getUser(UserService $userService)
+    {
+        //セッションからユーザーIDを取得
+        $session = Session::get('auth');
+
+        //セッションが無かったらエラーを返す
+        if (!$session) {
+            return $this->responseBad([
+                "message" => "ログインしていません。",
+            ], 403);
+        }
+
+        //セッションからユーザー情報を取得
+        $user = $userService->getUser($session);
+
+        return $this->responseOk([
+            "user" => $user,
+        ]);
+    }
+
 
     //google認証
     public function auth()
     {
-
         return Socialite::with('google')->redirect();
-
     }
 
+
     //google認証リダイレクトページ
-    //user情報を格納 / session格納
     public function googleCallback(UserService $userService)
     {
         $google_info = Socialite::with('google')->user();
-        $google_id = (int)$google_info->getId();
+        $google_id = $google_info->getId();
 
-        //DBからメールアドレスが一致したユーザー情報を取得
-        $user = DB::table('users')->where('google_id',$google_id)->first();
+        //googleのIDからユーザー情報を取得
+        $user = $userService->getUserByGoogleID($google_id);
 
-        //既に一致するユーザーがいない場合
-        if(!$user) {
-
-            $user = $userService->createUser($google_info);
-
+        if (!$user) {
+            //ユーザー情報を作成する
+            $userService->createUser($google_info, $google_id);
+            //ユーザーテーブルのユーザーIDをセッションに入れるため、ユーザー情報をユーザーテーブルから取得する必要がある。
+            $user = $userService->getUserByGoogleID($google_id);
         }
 
+        //セッションにuserのIDを格納
         Session::put('auth', $user->id);
-        return redirect('/');
 
+        //todo area分け
+        return redirect('/tokyo');
     }
-
 }
-

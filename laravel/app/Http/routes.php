@@ -11,19 +11,23 @@
 |
 */
 
-Route::get('/', 'RiceController@getUser');
+//ログインしているかチェック
+Route::get('/tokyo/rice/me', 'AuthController@getUser');
 
-Route::get('/auth','AuthController@auth');
-Route::get('/auth/callback','AuthController@googleCallback');
+//申し込みを受け付ける
+Route::post('/tokyo/rice/apply', 'RiceController@receive');
 
-Route::post('/apply', 'RiceController@apply');
+//コメールの状態を返す
+Route::get('/tokyo/rice/today', 'RiceController@today');
 
-Route::get('/today', 'RiceController@today');
+//google認証
+Route::get('/rice/auth', 'AuthController@auth');
 
+//google認証コールバック
+Route::get('/rice/auth/callback', 'AuthController@googleCallback');
+
+
+//以下作業用
 Route::get('/session', function () {
     Session::forget('auth');
-});
-
-Route::get('/form', function () {
-    return view('form');
 });

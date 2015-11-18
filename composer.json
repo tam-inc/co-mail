@@ -14,7 +14,8 @@
         "mockery/mockery": "0.9.*",
         "phpunit/phpunit": "~4.0",
         "phpspec/phpspec": "~2.1",
-        "heroku/heroku-buildpack-php": "*"
+        "heroku/heroku-buildpack-php": "*",
+        "codeception/codeception": "*"
     },
     "autoload": {
         "classmap": [
@@ -26,7 +27,7 @@
     },
     "autoload-dev": {
         "classmap": [
-            "laravel/tests/TestCase.php"
+            "laravel/tests/"
         ]
     },
     "scripts": {
