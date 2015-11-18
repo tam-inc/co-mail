@@ -3,6 +3,7 @@
  */
 
 module.exports = Backbone.Model.extend( {
+	// TODO: /api/{area}/rice/todayの方式にします
 	url: 'http://tambourine.herokuapp.com/v1/rice/today',
 	// このModelがInstance化されている時、通信成功するとviewNameをsetする
 	initialize: function () {

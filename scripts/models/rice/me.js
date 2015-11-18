@@ -3,5 +3,6 @@
  */
 
 module.exports = Backbone.Model.extend( {
+	// TODO: /api/{area}/rice/meの方式にします
 	url: 'http://tambourine.herokuapp.com/v1/rice/me'
 } );
